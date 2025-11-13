@@ -1,0 +1,288 @@
+practical 1
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| amitdb             |
+| information_schema |
+| mysql              |
+| performance_schema |
+| practical          |
+| sys                |
++--------------------+
+6 rows in set (0.04 sec)
+
+mysql> create database TEBD23211;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> use TEBD23211;
+Database changed
+mysql> CREATE TABLE Branch (
+    -> branch_name VARCHAR(50) PRIMARY KEY,
+    -> branch_city VARCHAR(50) NOT NULL,
+    -> assets DECIMAL(15,2) NOT NULL CHECK (assets >= 0)
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> CREATE TABLE Customer (
+    -> cust_name VARCHAR(100) PRIMARY KEY,
+    -> cust_street VARCHAR(100),
+    -> cust_city VARCHAR(50)
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> CREATE TABLE Account (
+    -> acc_no INT PRIMARY KEY,
+    -> branch_name VARCHAR(50) NOT NULL,
+    -> balance DECIMAL(12,2) NOT NULL CHECK (balance >= 0),
+    -> FOREIGN KEY (branch_name) REFERENCES Branch(branch_name)
+    -> );
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> CREATE TABLE Depositor (
+    -> cust_name VARCHAR(100) NOT NULL,
+    -> acc_no INT NOT NULL,
+    -> PRIMARY KEY (cust_name, acc_no),
+    -> FOREIGN KEY (cust_name) REFERENCES Customer(cust_name),
+    -> FOREIGN KEY (acc_no) REFERENCES Account(acc_no)
+    -> );
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> CREATE TABLE Loan (
+    -> loan_no int PRIMARY KEY,
+    -> branch_name VARCHAR(50) NOT NULL,
+    -> amount decimal(12,2) NOT NULL CHECK (amount > 0),
+    -> FOREIGN KEY (branch_name) REFERENCES Branch(branch_name)
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> CREATE TABLE Borrower (
+    ->  cust_name VARCHAR(100) NOT NULL,
+    -> loan_no INT NOT NULL,
+    -> PRIMARY KEY (cust_name, loan_no),
+    -> FOREIGN KEY (cust_name) REFERENCES Customer(cust_name),
+    -> FOREIGN KEY (loan_no) REFERENCES Loan(loan_no)
+    -> );
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> INSERT INTO Branch VALUES
+    -> ('Akurdi', 'pune', 500000.00),
+    -> ('Nigdi',  'Pune', 2500000.00),
+    -> ('Hinjewadi', 'Pune', 1800000.00);
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Customer VALUES
+    -> ('Ramesh', 'MG Road', 'Pune'),
+    -> ('Suresh', 'Camp', 'Pune'),
+    -> ('Geeta',  'Hinjewadi Rd', 'Pune'),
+    -> ('Anita',  'Akurdi Lane', 'Pune'),
+    -> ('Kiran',  'Nigdi Street', 'Pune');
+Query OK, 5 rows affected (0.05 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Account VALUES
+    -> (1001, 'Akurdi',   15000.00),
+    -> (1002, 'Akurdi',   8000.00),
+    -> (1003, 'Nigdi',    5000.00),
+    -> (1004, 'Hinjewadi',25000.00);
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql>  INSERT INTO Depositor VALUES
+    -> ('Ramesh', 1001),
+    -> ('Suresh', 1002),
+    -> ('Geeta',  1004),
+    -> ('Kiran',  1003);
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Loan VALUES
+    -> (2001, 'Akurdi', 13000.00),
+    -> (2002, 'Akurdi', 1400.00),
+    -> (2003, 'Nigdi',  20000.00),
+    -> (2004, 'Hinjewadi', 5000.00);
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Borrower VALUES
+    -> ('Ramesh', 2001),
+    -> ('Anita',  2002),
+    -> ('Kiran',  2003);
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> show tables;
++---------------------+
+| Tables_in_tebd23211 |
++---------------------+
+| account             |
+| borrower            |
+| branch              |
+| customer            |
+| depositor           |
+| loan                |
++---------------------+
+6 rows in set (0.03 sec)
+
+mysql> SELECT * FROM customer;
++-----------+--------------+-----------+
+| cust_name | cust_street  | cust_city |
++-----------+--------------+-----------+
+| Anita     | Akurdi Lane  | Pune      |
+| Geeta     | Hinjewadi Rd | Pune      |
+| Kiran     | Nigdi Street | Pune      |
+| Ramesh    | MG Road      | Pune      |
+| Suresh    | Camp         | Pune      |
++-----------+--------------+-----------+
+5 rows in set (0.00 sec)
+
+#10 queries
+
+( Q1. Find the names of all branches in loan relation.)
+
+mysql> SELECT DISTINCT branch_name FROM Loan;
++-------------+
+| branch_name |
++-------------+
+| Akurdi      |
+| Hinjewadi   |
+| Nigdi       |
++-------------+
+3 rows in set (0.00 sec)
+
+(Q2. Find all loan numbers for loans made at Akurdi Branch with loan amount > 12000.)
+
+mysql> SELECT loan_no FROM Loan
+    -> WHERE branch_name = 'Akurdi' AND amount > 12000;
++---------+
+| loan_no |
++---------+
+|    2001 |
++---------+
+1 row in set (0.00 sec)
+
+(Q3. Find all customers who have a loan from bank — names, loan_no and loan amount.)
+
+mysql> SELECT b.cust_name, l.loan_no, l.amount
+    -> FROM Borrower b
+    -> JOIN Loan l ON b.loan_no = l.loan_no;
++-----------+---------+----------+
+| cust_name | loan_no | amount   |
++-----------+---------+----------+
+| Ramesh    |    2001 | 13000.00 |
+| Anita     |    2002 |  1400.00 |
+| Kiran     |    2003 | 20000.00 |
++-----------+---------+----------+
+3 rows in set (0.00 sec)
+
+(Q4-Calculate total loan amount given by bank.)
+
+mysql> SELECT SUM(amount) AS total_loan_amount FROM Loan;
++-------------------+
+| total_loan_amount |
++-------------------+
+|          39400.00 |
++-------------------+
+1 row in set (0.00 sec)
+
+(Q5. Find all customers who have an account or loan or both at bank.)
+(-- union of depositors and borrowers)
+
+mysql> SELECT DISTINCT cust_name FROM Depositor
+    -> UNION
+    -> SELECT DISTINCT cust_name FROM Borrower;
++-----------+
+| cust_name |
++-----------+
+| Geeta     |
+| Kiran     |
+| Ramesh    |
+| Suresh    |
+| Anita     |
++-----------+
+5 rows in set (0.01 sec)
+
+(Q6. Find all customers who have both account and loan at bank.)
+(-- customers present in both tables)
+
+mysql> SELECT DISTINCT d.cust_name
+    -> FROM Depositor d
+    -> JOIN Borrower b ON d.cust_name = b.cust_name;
++-----------+
+| cust_name |
++-----------+
+| Ramesh    |
+| Kiran     |
++-----------+
+2 rows in set (0.00 sec)
+
+(Q7. Find all customers who have account but no loan at the bank.)
+
+mysql> SELECT DISTINCT d.cust_name
+    -> FROM Depositor d
+    -> LEFT JOIN Borrower b ON d.cust_name = b.cust_name
+    -> WHERE b.cust_name IS NULL;
++-----------+
+| cust_name |
++-----------+
+| Suresh    |
+| Geeta     |
++-----------+
+2 rows in set (0.00 sec)
+
+(Q8. Find average account balance at Akurdi branch.)
+
+mysql> SELECT AVG(balance) AS avg_balance
+    -> FROM Account
+    -> WHERE branch_name = 'Akurdi';
++--------------+
+| avg_balance  |
++--------------+
+| 11500.000000 |
++--------------+
+1 row in set (0.00 sec)
+
+(Q9. Find the average account balance at each branch.)
+
+mysql> SELECT branch_name, AVG(balance) AS avg_balance
+    ->  FROM Account
+    -> GROUP BY branch_name;
++-------------+--------------+
+| branch_name | avg_balance  |
++-------------+--------------+
+| Akurdi      | 11500.000000 |
+| Hinjewadi   | 25000.000000 |
+| Nigdi       |  5000.000000 |
++-------------+--------------+
+3 rows in set (0.00 sec)
+
+(Q10. Find number of depositors at each branch.)
+(-- count distinct customers per branch via account -> depositor)
+
+mysql> SELECT a.branch_name, COUNT(DISTINCT d.cust_name) AS num_depositors
+    -> FROM Account a
+    -> JOIN Depositor d ON a.acc_no = d.acc_no
+    -> GROUP BY a.branch_name;
++-------------+----------------+
+| branch_name | num_depositors |
++-------------+----------------+
+| Akurdi      |              2 |
+| Hinjewadi   |              1 |
+| Nigdi       |              1 |
++-------------+----------------+
+3 rows in set (0.00 sec)
+
+(11. find branches where average account balance >12000)
+
+mysql> select branch_name
+    -> FROM Account
+    -> GROUP BY branch_name
+    -> HAVING AVG(balance) > 12000;
++-------------+
+| branch_name |
++-------------+
+| Hinjewadi   |
++-------------+
+1 row in set (0.03 sec)

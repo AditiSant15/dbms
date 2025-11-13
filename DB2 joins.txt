@@ -1,0 +1,230 @@
+mysql> DROP DATABASE IF EXISTS practical;
+Query OK, 0 rows affected, 1 warning (0.02 sec)
+
+mysql> CREATE DATABASE practical;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> use practical;
+Database changed
+mysql> CREATE TABLE student (
+    -> id INT PRIMARY KEY AUTO_INCREMENT,
+    -> admission_no INT NOT NULL UNIQUE,
+    ->  first_name VARCHAR(45) NOT NULL,
+    ->   last_name VARCHAR(45) NOT NULL,
+    ->  age INT,
+    -> city VARCHAR(25) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.11 sec)
+
+mysql> CREATE TABLE Fee (
+    -> Fee_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->  admission_no INT NOT NULL,
+    -> course VARCHAR(100) NOT NULL,
+    ->   amount_paid INT,
+    ->  CONSTRAINT fk_fee_student FOREIGN KEY (admission_no) REFERENCES Student(admission_no)
+    -> );
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> INSERT INTO Student(admission_no, first_name, last_name, age, city) VALUES
+    -> (1001,'Shital','Gayke',18,'Sinnar'),
+    -> (1002,'Sakshi','More',19,'Nashik'),
+    -> (1003,'Nidhi','Jadhav',17,'Nashik'),
+    -> (1004,'Ajay','Mendade',18,'Satpur'),
+    -> (1005,'Prashant','More',19,'Wani'),
+    -> (1006,'Alok','Pandit',18,'Nashik'),
+    -> (1007,'Sanju','Banka',18,'Bhagur'),
+    -> (1010, 'ravi','patil', 20, 'nashik'),
+    -> (1011, 'sneha', 'sharma', 21, 'pune');
+
+mysql> INSERT INTO Fee(admission_no, course, amount_paid) VALUES
+    ->  (1001,'Android',10000),
+    -> (1002,'Data Science',15000),
+    -> (1003,'SQL',18000),
+    -> (1004,'Python',20000),
+    -> (1005,'Java',8000),
+    -> (1010,'Machine Learning',25000),
+    -> (1011,'Cyber Security',22000);
+Query OK, 7 rows affected (0.03 sec)
+Records: 7  Duplicates: 0  Warnings: 0
+
+---
+-- 1) INNER JOIN: students who have fee records
+---
+mysql> SELECT s.admission_no, s.first_name, s.last_name, f.course, f.amount_paid
+    -> FROM Student s
+    -> INNER JOIN Fee f ON s.admission_no = f.admission_no;
++--------------+------------+-----------+------------------+-------------+
+| admission_no | first_name | last_name | course           | amount_paid |
++--------------+------------+-----------+------------------+-------------+
+|         1001 | Shital     | Gayke     | Android          |       10000 |
+|         1002 | Sakshi     | More      | Data Science     |       15000 |
+|         1003 | Nidhi      | Jadhav    | SQL              |       18000 |
+|         1004 | Ajay       | Mendade   | Python           |       20000 |
+|         1005 | Prashant   | More      | Java             |        8000 |
+|         1010 | ravi       | patil     | Machine Learning |       25000 |
+|         1011 | sneha      | sharma    | Cyber Security   |       22000 |
++--------------+------------+-----------+------------------+-------------+
+7 rows in set (0.00 sec)
+---
+-- 2) LEFT JOIN: all students, with fee info if present
+---
+mysql> SELECT s.admission_no, s.first_name, s.last_name, f.course, f.amount_paid
+    -> FROM Student s
+    -> LEFT JOIN Fee f ON s.admission_no = f.admission_no;
++--------------+------------+-----------+------------------+-------------+
+| admission_no | first_name | last_name | course           | amount_paid |
++--------------+------------+-----------+------------------+-------------+
+|         1001 | Shital     | Gayke     | Android          |       10000 |
+|         1002 | Sakshi     | More      | Data Science     |       15000 |
+|         1003 | Nidhi      | Jadhav    | SQL              |       18000 |
+|         1004 | Ajay       | Mendade   | Python           |       20000 |
+|         1005 | Prashant   | More      | Java             |        8000 |
+|         1006 | Alok       | Pandit    | NULL             |        NULL |
+|         1007 | Sanju      | Banka     | NULL             |        NULL |
+|         1010 | ravi       | patil     | Machine Learning |       25000 |
+|         1011 | sneha      | sharma    | Cyber Security   |       22000 |
++--------------+------------+-----------+------------------+-------------+
+---
+-- 3) RIGHT JOIN: all fees, with student info if present
+---
+mysql> SELECT s.admission_no, s.first_name, s.last_name, f.course, f.amount_paid
+    -> FROM Student s
+    -> RIGHT JOIN Fee f ON s.admission_no = f.admission_no;
++--------------+------------+-----------+------------------+-------------+
+| admission_no | first_name | last_name | course           | amount_paid |
++--------------+------------+-----------+------------------+-------------+
+|         1001 | Shital     | Gayke     | Android          |       10000 |
+|         1002 | Sakshi     | More      | Data Science     |       15000 |
+|         1003 | Nidhi      | Jadhav    | SQL              |       18000 |
+|         1004 | Ajay       | Mendade   | Python           |       20000 |
+|         1005 | Prashant   | More      | Java             |        8000 |
+|         1010 | ravi       | patil     | Machine Learning |       25000 |
+|         1011 | sneha      | sharma    | Cyber Security   |       22000 |
++--------------+------------+-----------+------------------+-------------+
+-- =========================================================
+-- Query 4: FULL OUTER JOIN (using UNION for MySQL)
+👉 Combines left and right join results (shows all students + all fees).
+-- =========================================================
+mysql> SELECT s.admission_no, s.first_name, s.last_name, f.course, f.amount_paid
+    -> FROM Student s
+    -> LEFT JOIN Fee f ON s.admission_no = f.admission_no
+    -> UNION
+    -> SELECT s.admission_no, s.first_name, s.last_name, f.course, f.amount_paid
+    -> FROM Student s
+    -> RIGHT JOIN Fee f ON s.admission_no = f.admission_no;
++--------------+------------+-----------+------------------+-------------+
+| admission_no | first_name | last_name | course           | amount_paid |
++--------------+------------+-----------+------------------+-------------+
+|         1001 | Shital     | Gayke     | Android          |       10000 |
+|         1002 | Sakshi     | More      | Data Science     |       15000 |
+|         1003 | Nidhi      | Jadhav    | SQL              |       18000 |
+|         1004 | Ajay       | Mendade   | Python           |       20000 |
+|         1005 | Prashant   | More      | Java             |        8000 |
+|         1006 | Alok       | Pandit    | NULL             |        NULL |
+|         1007 | Sanju      | Banka     | NULL             |        NULL |
+|         1010 | ravi       | patil     | Machine Learning |       25000 |
+|         1011 | sneha      | sharma    | Cyber Security   |       22000 |
++--------------+------------+-----------+------------------+-------------+
+
+---
+--5)Students who paid above average
+---
+mysql> SELECT s.first_name, s.last_name, f.course, f.amount_paid
+    -> FROM Student s
+    -> JOIN Fee f ON s.admission_no = f.admission_no
+    -> WHERE f.amount_paid > (SELECT AVG(amount_paid) FROM Fee);
++------------+-----------+------------------+-------------+
+| first_name | last_name | course           | amount_paid |
++------------+-----------+------------------+-------------+
+| Nidhi      | Jadhav    | SQL              |       18000 |
+| Ajay       | Mendade   | Python           |       20000 |
+| ravi       | patil     | Machine Learning |       25000 |
+| sneha      | sharma    | Cyber Security   |       22000 |
++------------+-----------+------------------+-------------+
+---
+-- 6) SELF JOIN: students living in the same city (pairs)
+---
+mysql> SELECT a.admission_no AS s1, a.first_name AS name1,
+    -> b.admission_no AS s2, b.first_name AS name2, a.city
+    -> FROM Student a
+    -> JOIN Student b ON a.city = b.city AND a.admission_no < b.admission_no;
++------+--------+------+-------+--------+
+| s1   | name1  | s2   | name2 | city   |
++------+--------+------+-------+--------+
+| 1002 | Sakshi | 1003 | Nidhi | Nashik |
+| 1002 | Sakshi | 1006 | Alok  | Nashik |
+| 1002 | Sakshi | 1010 | ravi  | Nashik |
+| 1003 | Nidhi  | 1006 | Alok  | Nashik |
+| 1003 | Nidhi  | 1010 | ravi  | Nashik |
+| 1006 | Alok   | 1010 | ravi  | Nashik |
++------+--------+------+-------+--------+
+
+---
+-- 7) Scalar subquery: fee record(s) with minimum amount_paid
+👉 Displays the course and student who paid the smallest fee.
+---
+mysql> SELECT * FROM Fee
+    -> WHERE amount_paid = (SELECT MIN(amount_paid) FROM Fee);
++--------+--------------+--------+-------------+
+| Fee_id | admission_no | course | amount_paid |
++--------+--------------+--------+-------------+
+|     12 |         1005 | Java   |        8000 |
++--------+--------------+--------+-------------+
+---
+-- 8)  Show total fees collected
+---
+mysql> SELECT SUM(amount_paid) AS total_fees_collected
+    -> FROM Fee;
++----------------------+
+| total_fees_collected |
++----------------------+
+|               118000 |
++----------------------+
+---
+-- 9) EXISTS/NOT EXISTS example: students without any fee record
+---
+
+mysql> SELECT s.admission_no, s.first_name, s.last_name
+    -> FROM Student s
+    -> WHERE NOT EXISTS (SELECT 1 FROM Fee f WHERE f.admission_no = s.admission_no);
++--------------+------------+-----------+
+| admission_no | first_name | last_name |
++--------------+------------+-----------+
+|         1006 | Alok       | Pandit    |
+|         1007 | Sanju      | Banka     |
++--------------+------------+-----------+
+---
+--10) Update fee amount for one student
+---
+mysql> UPDATE Fee
+    -> SET amount_paid = 20000
+    -> WHERE admission_no = 1003;
+Query OK, 1 row affected (0.03 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+---
+---
+
+EXTRA QUERIES
+
+---
+Query 11 — Show number of students in each city
+SELECT city, COUNT(*) AS total_students
+FROM Student
+GROUP BY city;
+---
+Query 12 — Delete a fee record
+DELETE FROM Fee
+WHERE admission_no = 1005;
+---
+===========================================================================
+🔹 What is a JOIN?
+
+A JOIN combines data from two or more tables using a related column (usually a key).
+
+Join Type	Description
+INNER JOIN	Returns only matching rows between tables
+LEFT JOIN	Returns all rows from the left table and matches from the right
+RIGHT JOIN	Returns all rows from the right table and matches from the left
+FULL OUTER JOIN	Returns all rows from both tables (matched + unmatched)
+CROSS JOIN	Returns every combination of rows (Cartesian product)
+SELF JOIN	Joins a table with itself

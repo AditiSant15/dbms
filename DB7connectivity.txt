@@ -1,0 +1,122 @@
+import mysql.connector
+
+# Connect to MySQL
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="Root@123",
+    database="student_db"
+)
+
+cursor = conn.cursor()
+
+# Functions for DB operations
+def add_student(name, roll_no, division):
+    query = "INSERT INTO students (name, roll_no, division) VALUES (%s, %s, %s)"
+    cursor.execute(query, (name, roll_no, division))
+    conn.commit()
+    print("Student added successfully!")
+
+
+def view_students():
+    cursor.execute("SELECT * FROM students")
+    rows = cursor.fetchall()
+    if not rows:
+        print("\nNo records found.")
+        return
+    print("\nStudent List:")
+    for row in rows:
+        print(f"ID: {row[0]}, Name: {row[1]}, Roll No: {row[2]}, Division: {row[3]}")
+
+
+def edit_student(student_id, name, roll_no, division):
+    query = "UPDATE students SET name=%s, roll_no=%s, division=%s WHERE id=%s"
+    cursor.execute(query, (name, roll_no, division, student_id))
+    conn.commit()
+    print("Student details updated successfully!")
+
+
+def delete_student(student_id):
+    query = "DELETE FROM students WHERE id=%s"
+    cursor.execute(query, (student_id,))
+    conn.commit()
+    print("Student deleted successfully!")
+
+
+# Terminal menu
+while True:
+    print("\n--- Student Database Menu ---")
+    print("1. Add Student")
+    print("2. View Students")
+    print("3. Edit Student")
+    print("4. Delete Student")
+    print("5. Exit")
+
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        name = input("Enter Name: ")
+        roll_no = int(input("Enter Roll No: "))
+        division = input("Enter Division: ")
+        add_student(name, roll_no, division)
+
+    elif choice == "2":
+        view_students()
+
+    elif choice == "3":
+        student_id = int(input("Enter Student ID to edit: "))
+        name = input("Enter New Name: ")
+        roll_no = int(input("Enter New Roll No: "))
+        division = input("Enter New Division: ")
+        edit_student(student_id, name, roll_no, division)
+
+    elif choice == "4":
+        student_id = int(input("Enter Student ID to delete: "))
+        delete_student(student_id)
+
+    elif choice == "5":
+        print("Exiting...")
+        break
+
+    else:
+        print("Invalid choice! Please try again.")
+
+# Close connection
+cursor.close()
+conn.close()
+
+
+
+
+
+If you still get an error like
+ModuleNotFoundError: No module named 'mysql',
+run this command in your terminal first:
+pip install mysql-connector-python
+
+
+
+my sql connection before-(write this code on terminal first)
+
+mysql> create database students;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> USE student;
+Database changed
+
+mysql> CREATE TABLE students (
+    -> id INT PRIMARY KEY,
+    -> NAME VARCHAR(100),
+    ->  ROLL_NO INT,
+    -> DIVISION VARCHAR(5)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> select * from students;
+Empty set (0.00 sec)
+
+(first execute the above python code on different terminal and then again write on same sql terminal as)
+
+select * from students;
+
+(after adding running different commants of python code)

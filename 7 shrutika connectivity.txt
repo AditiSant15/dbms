@@ -1,0 +1,141 @@
+practical no 7
+
+
+STEP 1 -
+ON TERMINAL OPEN MYSQL 
+---------------------------------
+
+CREATE DATABASE school;
+USE school;
+
+CREATE TABLE teachers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  department VARCHAR(100),
+  salary INT
+);
+
+INSERT INTO teachers (name, department, salary)
+VALUES
+('John Doe', 'CSE', 35000),
+('Jane Smith', 'ECE', 20000),
+('Bob Brown', 'ME', 20000);
+
+SELECT * FROM teachers;
++----+------------+-------------+--------+
+| id | name       | department  | salary |
++----+------------+-------------+--------+
+|  1 | John Doe   | CSE         |  35000 |
+|  2 | Jane Smith | ECE         |  20000 |
+|  3 | Bob Brown  | ME          |  20000 |
++----+------------+-------------+--------+
+
+EXIT;
+
+
+STEP 2-
+OPEN TEXT EDITOR 
+-------------------------------------
+
+import mysql.connector
+
+config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'your_password',  # ← replace with your MySQL password if you set one
+    'database': 'school'
+}
+
+def add_teacher(name, dept, salary):
+    conn = mysql.connector.connect(**config)
+    cur = conn.cursor()
+    cur.execute("INSERT INTO teachers (name, department, salary) VALUES (%s, %s, %s)", (name, dept, salary))
+    conn.commit()
+    print("✅ Teacher added successfully.")
+    cur.close()
+    conn.close()
+
+def view_teachers():
+    conn = mysql.connector.connect(**config)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM teachers")
+    rows = cur.fetchall()
+    print("\n--- Teacher Records ---")
+    for r in rows:
+        print(f"ID={r[0]} | Name={r[1]} | Dept={r[2]} | Salary={r[3]}")
+    cur.close()
+    conn.close()
+
+def edit_teacher(tid, name, dept, salary):
+    conn = mysql.connector.connect(**config)
+    cur = conn.cursor()
+    cur.execute("UPDATE teachers SET name=%s, department=%s, salary=%s WHERE id=%s", (name, dept, salary, tid))
+    conn.commit()
+    print("✏️ Record updated.")
+    cur.close()
+    conn.close()
+
+def delete_teacher(tid):
+    conn = mysql.connector.connect(**config)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM teachers WHERE id=%s", (tid,))
+    conn.commit()
+    print("🗑️ Record deleted.")
+    cur.close()
+    conn.close()
+
+def main():
+    while True:
+        print("\n=== Teacher Database Menu ===")
+        print("1. Add Teacher")
+        print("2. View Teachers")
+        print("3. Edit Teacher")
+        print("4. Delete Teacher")
+        print("5. Exit")
+
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            name = input("Enter name: ")
+            dept = input("Enter department: ")
+            salary = int(input("Enter salary: "))
+            add_teacher(name, dept, salary)
+        elif choice == "2":
+            view_teachers()
+        elif choice == "3":
+            tid = int(input("Enter teacher ID: "))
+            name = input("Enter new name: ")
+            dept = input("Enter new department: ")
+            salary = int(input("Enter new salary: "))
+            edit_teacher(tid, name, dept, salary)
+        elif choice == "4":
+            tid = int(input("Enter teacher ID to delete: "))
+            delete_teacher(tid)
+        elif choice == "5":
+            print("👋 Goodbye!")
+            break
+        else:
+            print("❌ Invalid choice, try again.")
+
+if __name__ == "__main__":
+    main()
+
+-------------------------------------------------------------------------
+SAVE THE FILE as db_connectivity.py
+--------------------------------------------------------------------------
+Back in your terminal:
+
+cd ~/Documents
+python3 db_connectivity.py
+
+
+✅ You’ll see:
+
+=== Teacher Database Menu ===
+1. Add Teacher
+2. View Teachers
+3. Edit Teacher
+4. Delete Teacher
+5. Exit
+Enter choice:
+---------------------------------------------------------------
